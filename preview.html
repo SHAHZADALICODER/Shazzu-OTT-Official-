@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --dark-blue-base: #0D144A;
@@ -17,8 +18,9 @@
             --button-color: #5A62FF;
             --button-hover-color: #8C94FF;
         }
-        
-        body, html {
+
+        body,
+        html {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -31,7 +33,9 @@
         /* --- UPDATED CSS FOR PORTRAIT MODE --- */
         @media (orientation: portrait) {
             body {
+                /* Correctly rotate the entire body */
                 transform: rotate(90deg);
+                /* Position it to fill the screen after rotation */
                 transform-origin: 0% 0%;
                 width: 100vh;
                 height: 100vw;
@@ -41,7 +45,7 @@
                 overflow: hidden;
             }
         }
-        
+
         .background-image {
             position: fixed;
             top: 0;
@@ -67,6 +71,7 @@
             text-align: center;
             padding: 20px;
             box-sizing: border-box;
+            /* Out-glow effect using box-shadow */
             box-shadow: 0 0 50px 20px rgba(0, 0, 0, 0.8) inset;
         }
 
@@ -131,8 +136,9 @@
             cursor: pointer;
             transition: background-color 0.3s;
             z-index: 10;
+            /* Make sure it's on top of other elements */
         }
-        
+
         .go-back-button:hover {
             background: rgba(0, 0, 0, 0.8);
         }
@@ -142,12 +148,15 @@
                 padding: 20px;
                 max-width: 90%;
             }
+
             .preview-content h2 {
                 font-size: 2em;
             }
+
             .preview-content p {
                 font-size: 1em;
             }
+
             .watch-button {
                 font-size: 1.2em;
                 padding: 12px 30px;
@@ -155,6 +164,7 @@
         }
     </style>
 </head>
+
 <body>
     <img src="" alt="Film Thumbnail" class="background-image" id="film-thumbnail">
     <button class="go-back-button" onclick="history.back()">Go Back</button>
@@ -163,7 +173,7 @@
         <div class="preview-content">
             <h2 id="film-title"></h2>
             <p id="film-description"></p>
-            <a id="watch-link" href="FilmPlayer.html">
+            <a id="watch-link" target="_blank" rel="noopener noreferrer">
                 <button class="watch-button">Watch</button>
             </a>
         </div>
@@ -173,16 +183,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Retrieve film data from local storage
             const filmDataString = localStorage.getItem('currentFilm');
-            let filmData;
 
             if (!filmDataString) {
+                // Handle case where no data is found (e.g., direct page load or error)
                 document.querySelector('.preview-content').innerHTML = '<h2 style="color:red;">Error: Film data not found!</h2>';
                 console.error('No film data found in local storage.');
                 return;
             }
-            
-            filmData = JSON.parse(filmDataString);
-            
+
+            const filmData = JSON.parse(filmDataString);
+
             const title = filmData.TITLE;
             const description = filmData.DESCRIPTION;
             const link = filmData.LINK;
@@ -198,6 +208,7 @@
                 if (videoId) {
                     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
                     document.getElementById('film-thumbnail').src = thumbnailUrl;
+                    document.getElementById('watch-link').href = link;
                 }
             }
 
@@ -206,20 +217,8 @@
                 const match = url.match(regex);
                 return match ? match[1] : null;
             }
-            
-            // NEW LOGIC: Check for Android device immediately on page load
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const watchLinkElement = document.getElementById('watch-link');
-            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
-            
-            if (/android/i.test(userAgent)) {
-                // Construct the Android intent URL
-                const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
-                
-                // Set the watch button's href to the intent URL
-                watchLinkElement.href = intentUrl;
-            }
         });
     </script>
 </body>
+
 </html>
