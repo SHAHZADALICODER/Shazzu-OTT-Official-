@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-
+    
     <style>
         :root {
             --dark-blue-base: #0D144A;
@@ -18,9 +17,8 @@
             --button-color: #5A62FF;
             --button-hover-color: #8C94FF;
         }
-
-        body,
-        html {
+        
+        body, html {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -43,7 +41,7 @@
                 overflow: hidden;
             }
         }
-
+        
         .background-image {
             position: fixed;
             top: 0;
@@ -134,7 +132,7 @@
             transition: background-color 0.3s;
             z-index: 10;
         }
-
+        
         .go-back-button:hover {
             background: rgba(0, 0, 0, 0.8);
         }
@@ -144,15 +142,12 @@
                 padding: 20px;
                 max-width: 90%;
             }
-
             .preview-content h2 {
                 font-size: 2em;
             }
-
             .preview-content p {
                 font-size: 1em;
             }
-
             .watch-button {
                 font-size: 1.2em;
                 padding: 12px 30px;
@@ -160,7 +155,6 @@
         }
     </style>
 </head>
-
 <body>
     <img src="" alt="Film Thumbnail" class="background-image" id="film-thumbnail">
     <button class="go-back-button" onclick="history.back()">Go Back</button>
@@ -185,9 +179,9 @@
                 console.error('No film data found in local storage.');
                 return;
             }
-
+            
             filmData = JSON.parse(filmDataString);
-
+            
             const title = filmData.TITLE;
             const description = filmData.DESCRIPTION;
             const link = filmData.LINK;
@@ -198,29 +192,6 @@
             if (description) {
                 document.getElementById('film-description').innerText = description;
             }
-
-            const watchLinkElement = document.getElementById('watch-link');
-            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
-
-            // This is the robust way to create the deep link for Android.
-            // It uses the standard 'intent://' scheme which automatically handles fallbacks.
-            const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=shazzuapp;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
-
-            // We set the button's href to the intent URL as a fallback for browsers
-            // that don't support the immediate redirect, and for user visibility.
-            watchLinkElement.href = intentUrl;
-
-            // Immediately trigger the deep link check on page load.
-            // If the device is Android, this will try to open the app.
-            // If the app is not found, the intent will automatically redirect to the Play Store.
-            if (/android/i.test(navigator.userAgent)) {
-                console.log('Android device detected. Attempting to open app immediately...');
-                window.location.href = intentUrl;
-            } else {
-                console.log('Non-Android device detected. Not attempting deep link.');
-            }
-
-            // Load film thumbnail if available
             if (link) {
                 const videoId = extractVideoId(link);
                 if (videoId) {
@@ -234,9 +205,28 @@
                 const match = url.match(regex);
                 return match ? match[1] : null;
             }
+            
+            // New logic for the watch button click
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const watchLinkElement = document.getElementById('watch-link');
+            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
+            
+            // Log the user agent for debugging
+            console.log('User Agent:', userAgent);
+            
+            // Check if the user is on an Android device
+            if (/android/i.test(userAgent)) {
+                console.log('Android device detected!');
+                // A more standard intent URL format
+                const intentUrl = `intent://shazzuapp/view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=shazzuapp;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
+                watchLinkElement.href = intentUrl;
+                
+                // Trigger the intent immediately on page load
+                window.location = intentUrl;
+            } else {
+                console.log('Non-Android device detected.');
+            }
         });
     </script>
-
 </body>
-
 </html>
