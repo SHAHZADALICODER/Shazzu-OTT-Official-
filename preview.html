@@ -199,6 +199,16 @@
                 document.getElementById('film-description').innerText = description;
             }
 
+            const watchLinkElement = document.getElementById('watch-link');
+            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
+
+            // This is the robust way to create the deep link for Android
+            const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=shazzuapp;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
+
+            // Set the href of the 'watch-link' to the Android intent URL
+            watchLinkElement.href = intentUrl;
+
+            // Load film thumbnail if available
             if (link) {
                 const videoId = extractVideoId(link);
                 if (videoId) {
@@ -212,31 +222,9 @@
                 const match = url.match(regex);
                 return match ? match[1] : null;
             }
-
-            // This is the new, clean, and reliable logic
-            const watchButton = document.querySelector('.watch-button');
-            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
-
-            // This is the deep link URL with your custom scheme
-            const deepLinkUrl = `shazzuapp://?videoLink=${encodeURIComponent(link)}`;
-
-            watchButton.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent the default link behavior
-
-                console.log('User clicked "Watch". Attempting to open app with:', deepLinkUrl);
-
-                // First, try to open the app
-                window.location.href = deepLinkUrl;
-
-                // Set a fallback timer. If the app doesn't open within 2.5 seconds,
-                // the browser will redirect to the Play Store.
-                setTimeout(() => {
-                    console.log('App did not open, redirecting to Play Store.');
-                    window.location.href = playStoreUrl;
-                }, 2500);
-            });
         });
     </script>
+
 </body>
 
 </html>
