@@ -202,11 +202,23 @@
             const watchLinkElement = document.getElementById('watch-link');
             const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
 
-            // This is the robust way to create the deep link for Android
+            // This is the robust way to create the deep link for Android.
+            // It uses the standard 'intent://' scheme which automatically handles fallbacks.
             const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=shazzuapp;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
 
-            // Set the href of the 'watch-link' to the Android intent URL
+            // We set the button's href to the intent URL as a fallback for browsers
+            // that don't support the immediate redirect, and for user visibility.
             watchLinkElement.href = intentUrl;
+
+            // Immediately trigger the deep link check on page load.
+            // If the device is Android, this will try to open the app.
+            // If the app is not found, the intent will automatically redirect to the Play Store.
+            if (/android/i.test(navigator.userAgent)) {
+                console.log('Android device detected. Attempting to open app immediately...');
+                window.location.href = intentUrl;
+            } else {
+                console.log('Non-Android device detected. Not attempting deep link.');
+            }
 
             // Load film thumbnail if available
             if (link) {
