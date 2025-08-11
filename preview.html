@@ -206,15 +206,27 @@
                 return match ? match[1] : null;
             }
             
-            // New logic for the watch button click
+            // New logic for the watch button click with added console logs
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             const watchLinkElement = document.getElementById('watch-link');
             const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
             
+            // *** ADDED CONSOLE LOGS FOR DEBUGGING ***
+            console.log('User Agent:', userAgent);
+            
             // Check if the user is on an Android device
             if (/android/i.test(userAgent)) {
+                console.log('Android device detected!');
                 const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
                 watchLinkElement.href = intentUrl;
+                console.log('Watch button href set to:', intentUrl);
+                
+                // Add a window.location to trigger the intent immediately on page load
+                window.location = intentUrl;
+                
+            } else {
+                console.log('Non-Android device detected.');
+                console.log('Watch button href remains:', watchLinkElement.href);
             }
         });
     </script>

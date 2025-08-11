@@ -3,472 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shazzu - Your Creative Hub</title>
+    <title>Film Preview</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-
+    
     <style>
-        /* General Body and Theme */
         :root {
             --dark-blue-base: #0D144A;
             --dark-blue-accent: #172054;
             --light-text: #E0E0FF;
-            --new-badge-color: #FF5252;
-            --live-badge-color: #38C76D; /* A green for live badge */
+            --button-color: #5A62FF;
+            --button-hover-color: #8C94FF;
         }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--dark-blue-base);
-            color: var(--light-text);
+        
+        body, html {
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            line-height: 1.6;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 40px;
-            color: var(--light-text);
-        }
-
-        /* Featured Item Styling */
-        .featured-film {
-            position: relative;
-            background-color: var(--dark-blue-accent);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            cursor: pointer;
-            margin-bottom: 50px;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-        
-        .featured-film:hover {
-            transform: scale(1.01);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
-        }
-
-        .featured-film img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 12px;
-        }
-
-        .featured-title-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 30px 20px;
-            box-sizing: border-box;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-            text-align: left;
-        }
-
-        .featured-title {
-            margin: 0;
-            font-size: 2em;
-            font-weight: 600;
-            color: var(--light-text);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-        }
-        
-        /* Grid Separator */
-        .grid-separator {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        
-        .grid-separator h2 {
-            margin: 0;
-            font-size: 1.8em;
-            font-weight: 600;
-            display: inline-block;
-            padding: 0 20px;
-            background-color: var(--dark-blue-base);
-            z-index: 2;
-            position: relative;
-        }
-        
-        .grid-separator::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: var(--dark-blue-accent);
-            z-index: 1;
-        }
-
-        /* Main Container for the Grid */
-        .film-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
             padding: 0;
-            list-style: none;
-        }
-
-        /* Single Film Item Styling */
-        .film-item {
-            position: relative;
-            background-color: var(--dark-blue-accent);
-            border-radius: 12px;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            cursor: pointer;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-
-        .film-item:hover {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
-        }
-
-        .film-item img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .film-title-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px 15px;
-            box-sizing: border-box;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-            text-align: center;
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        .film-item:hover .film-title-overlay {
-            opacity: 1;
-        }
-
-        .film-title {
-            margin: 0;
-            font-size: 1.3em;
-            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
             color: var(--light-text);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
 
-        /* Animated Badge Styles */
-        .badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.8em;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            z-index: 10;
-            color: white;
-            animation: glowing 1.5s infinite ease-in-out;
-        }
-        
-        .featured-film .badge {
-            top: 20px;
-            right: 20px;
-            font-size: 1em;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .badge.new { background-color: var(--new-badge-color); }
-        .badge.coming-soon { background-color: var(--new-badge-color); }
-        .badge.live { background-color: var(--live-badge-color); }
-        
-        @keyframes glowing {
-            0%, 100% { box-shadow: 0 0 5px currentColor; }
-            50% { box-shadow: 0 0 20px currentColor, 0 0 10px currentColor; }
-        }
-
-        /* NEW CSS for the footer */
-        footer {
-            background-color: var(--dark-blue-accent);
-            color: var(--light-text);
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: 50px;
-        }
-        
-        footer p {
-            margin: 5px 0;
-            font-size: 0.9em;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
+        /* --- UPDATED CSS FOR PORTRAIT MODE --- */
+        @media (orientation: portrait) {
             body {
-                padding: 10px;
-            }
-            .featured-title {
-                font-size: 1.5em;
-            }
-            .film-grid {
-                grid-template-columns: 1fr;
-            }
-            h1 {
-                font-size: 2em;
-                margin-bottom: 20px;
+                transform: rotate(90deg);
+                transform-origin: 0% 0%;
+                width: 100vh;
+                height: 100vw;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                overflow: hidden;
             }
         }
-
-        /* --- New CSS for the Dialog Box --- */
-        #dialog-container {
-            display: none; /* Initially hidden */
+        
+        .background-image {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 9999;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 0 50px 20px rgba(0, 0, 0, 0.8) inset;
         }
-        
-        #dialog-box {
-            background-color: var(--dark-blue-accent);
+
+        .preview-content {
+            max-width: 800px;
+            background-color: rgba(0, 0, 0, 0.4);
             padding: 40px;
             border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(90, 98, 255, 0.5); /* Blue glowing effect */
-            max-width: 90%;
-            color: var(--light-text);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease-in-out;
             position: relative;
         }
 
-        #dialog-box p {
-            font-size: 1.2em;
-            white-space: pre-line; /* Renders \n as a new line */
-            margin-bottom: 20px;
-        }
-
-        /* --- NEW: Style for the clickable link --- */
-        #dialog-box a {
-            color: #5A62FF;
-            text-decoration: underline;
+        .preview-content h2 {
+            font-size: 3em;
+            margin: 0 0 10px 0;
             font-weight: bold;
-            transition: color 0.3s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
-        #dialog-box a:hover {
-            color: #8C94FF;
+        .preview-content p {
+            font-size: 1.2em;
+            margin-top: 0;
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
 
-        #dialog-close-btn {
-            background-color: var(--new-badge-color);
-            color: white;
+        .watch-button {
+            padding: 15px 40px;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--light-text);
+            background-color: var(--button-color);
             border: none;
-            padding: 10px 25px;
             border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            transition: all 0.4s ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .watch-button:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 20px var(--button-hover-color), 0 0 40px var(--button-hover-color);
+        }
+
+        /* Go back button style */
+        .go-back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--light-text);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
             font-size: 1em;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        
+        .go-back-button:hover {
+            background: rgba(0, 0, 0, 0.8);
         }
 
-        #dialog-close-btn:hover {
-            transform: scale(1.05);
-            background-color: #FF7B7B;
+        @media (max-width: 600px) {
+            .preview-content {
+                padding: 20px;
+                max-width: 90%;
+            }
+            .preview-content h2 {
+                font-size: 2em;
+            }
+            .preview-content p {
+                font-size: 1em;
+            }
+            .watch-button {
+                font-size: 1.2em;
+                padding: 12px 30px;
+            }
         }
     </style>
 </head>
 <body>
+    <img src="" alt="Film Thumbnail" class="background-image" id="film-thumbnail">
+    <button class="go-back-button" onclick="history.back()">Go Back</button>
 
-    <header>
-        <h1>Shazzu</h1>
-    </header>
-
-    <section id="featured-film-container">
-        <p style="text-align:center;">Loading featured film...</p>
-    </section>
-    
-    <div class="grid-separator">
-        <h2>Our Collection</h2>
-    </div>
-
-    <main class="film-grid" id="films-container">
-        <p style="text-align:center;">Loading films from Firestore...</p>
-    </main>
-    
-    <footer>
-        <p>This is the official platform of Shazzu.</p>
-        <p>Founded by Shahzad Ali.</p>
-    </footer>
-
-    <div id="dialog-container">
-        <div id="dialog-box">
-            <p>This is a testing web server program from Shazzu backend. The server is still in development.<br><br>
-            If you are using android please install our official android application from <a href="https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu&hl=en-US" target="_blank" rel="noopener noreferrer">Google play</a>.<br><br>
-            For Ios and Dekstop users Please wait for the complete of the server.</p>
-            <button id="dialog-close-btn">Close</button>
+    <div class="overlay">
+        <div class="preview-content">
+            <h2 id="film-title"></h2>
+            <p id="film-description"></p>
+            <a id="watch-link" href="FilmPlayer.html">
+                <button class="watch-button">Watch</button>
+            </a>
         </div>
     </div>
+
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD4tIqVSUIRRKORyf4H34hTu1pkMxFxge0",
-            authDomain: "shazzuott.firebaseapp.com",
-            projectId: "shazzuott",
-            storageBucket: "shazzuott.firebasestorage.app",
-            messagingSenderId: "609756366225",
-            appId: "1:609756366225:web:30610e75ed517c040ac630"
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const filmDataString = localStorage.getItem('currentFilm');
+            let filmData;
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        
-        const db = firebase.firestore();
-        const filmsContainer = document.getElementById('films-container');
-        const featuredFilmContainer = document.getElementById('featured-film-container');
-
-        // Function to create and append a film item to the grid
-        function createFilmItem(filmData, isNew = false) {
-            const filmItem = document.createElement('div');
-            filmItem.classList.add('film-item');
-            
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-            const match = filmData.LINK.match(regex);
-            const videoId = match ? match[1] : null;
-
-            if (!videoId) {
-                console.error('Could not find video ID for:', filmData.LINK);
-                const thumbnailUrl = 'https://via.placeholder.com/280x160?text=Invalid+Link'; 
-                filmItem.innerHTML = `<img src="${thumbnailUrl}" alt="Invalid Link">`;
-                return filmItem;
-            }
-            
-            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-            
-            filmItem.innerHTML = `
-                ${isNew ? '<span class="badge new">New</span>' : ''}
-                <img src="${thumbnailUrl}" alt="${filmData.TITLE}">
-                <div class="film-title-overlay">
-                    <h2 class="film-title">${filmData.TITLE}</h2>
-                </div>
-            `;
-            
-            // This is the new click event handler
-            filmItem.addEventListener('click', () => {
-                // Show the dialog box
-                // document.getElementById('dialog-container').style.display = 'flex';
-                
-                // Commented out the original functionality
-                
-                // Save film data to local storage as a JSON string
-                localStorage.setItem('currentFilm', JSON.stringify(filmData));
-                window.location.href = `preview.html`;
-                
-            });
-            
-            return filmItem;
-        }
-
-        // Function to create the featured film item
-        function createFeaturedFilm(filmData) {
-            const featuredFilm = document.createElement('div');
-            featuredFilm.classList.add('featured-film');
-            
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-            const match = filmData.LINK.match(regex);
-            const videoId = match ? match[1] : null;
-
-            if (!videoId) {
-                console.error('Could not find video ID for:', filmData.LINK);
-                const thumbnailUrl = 'https://via.placeholder.com/1280x720?text=Invalid+Link'; 
-                featuredFilm.innerHTML = `<img src="${thumbnailUrl}" alt="Invalid Link">`;
-                return featuredFilm;
-            }
-
-            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-            const badgeText = filmData.LIVE === "NO" ? "Coming Soon" : "Live";
-            const badgeClass = filmData.LIVE === "NO" ? "coming-soon" : "live";
-            
-            featuredFilm.innerHTML = `
-                <span class="badge ${badgeClass}">${badgeText}</span>
-                <img src="${thumbnailUrl}" alt="${filmData.TITLE}">
-                <div class="featured-title-overlay">
-                    <h2 class="featured-title">${filmData.TITLE}</h2>
-                </div>
-            `;
-            
-            // This is the new click event handler
-            featuredFilm.addEventListener('click', () => {
-                // Show the dialog box
-                // document.getElementById('dialog-container').style.display = 'flex';
-
-                // Commented out the original functionality
-                
-                const title = encodeURIComponent(filmData.TITLE);
-                const description = encodeURIComponent(filmData.DESCRIPTION);
-                const link = encodeURIComponent(filmData.LINK);
-                window.location.href = `preview.html?title=${title}&desc=${description}&link=${link}`;
-                
-            });
-            
-            return featuredFilm;
-        }
-
-        // Fetch data for the featured film
-        db.collection("HEAD").doc("LATEST").get().then((doc) => {
-            featuredFilmContainer.innerHTML = '';
-            if (doc.exists) {
-                const filmData = doc.data();
-                if (filmData.ENABLE) {
-                    const featuredItem = createFeaturedFilm(filmData);
-                    featuredFilmContainer.appendChild(featuredItem);
-                }
-            }
-        }).catch((error) => {
-            console.error("Error fetching featured document: ", error);
-            featuredFilmContainer.innerHTML = '<p style="text-align:center;">Error loading featured film.</p>';
-        });
-
-        // Fetch data for the film grid
-        db.collection("FILMS").get().then((querySnapshot) => {
-            filmsContainer.innerHTML = '';
-            
-            if (querySnapshot.empty) {
-                filmsContainer.innerHTML = '<p style="text-align:center;">No films found.</p>';
+            if (!filmDataString) {
+                document.querySelector('.preview-content').innerHTML = '<h2 style="color:red;">Error: Film data not found!</h2>';
                 return;
             }
             
-            // Convert querySnapshot to an array, reverse it, then iterate
-            const docs = querySnapshot.docs;
-            const reversedDocs = docs.reverse();
+            filmData = JSON.parse(filmDataString);
             
-            let isFirstItem = true;
-            reversedDocs.forEach((doc) => {
-                const filmData = doc.data();
-                const newFilmItem = createFilmItem(filmData, isFirstItem);
-                filmsContainer.appendChild(newFilmItem);
-                isFirstItem = false;
-            });
-        }).catch((error) => {
-            console.error("Error fetching documents: ", error);
-            filmsContainer.innerHTML = '<p style="text-align:center;">Error loading films. Please try again later.</p>';
-        });
+            const title = filmData.TITLE;
+            const description = filmData.DESCRIPTION;
+            const link = filmData.LINK;
 
-        // Event listener to close the dialog box
-        document.getElementById('dialog-close-btn').addEventListener('click', () => {
-            document.getElementById('dialog-container').style.display = 'none';
+            if (title) {
+                document.getElementById('film-title').innerText = title;
+            }
+            if (description) {
+                document.getElementById('film-description').innerText = description;
+            }
+            if (link) {
+                const videoId = extractVideoId(link);
+                if (videoId) {
+                    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    document.getElementById('film-thumbnail').src = thumbnailUrl;
+                }
+            }
+
+            function extractVideoId(url) {
+                const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                const match = url.match(regex);
+                return match ? match[1] : null;
+            }
+            
+            // New logic for the watch button click with added alerts
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const watchLinkElement = document.getElementById('watch-link');
+            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
+            
+            // Check if the user is on an Android device
+            if (/android/i.test(userAgent)) {
+                alert('Android device detected!');
+                const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;package=com.ott.shahzadali.shazzu;scheme=app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
+                watchLinkElement.href = intentUrl;
+                alert('Watch button href set to: ' + intentUrl);
+                
+                window.location = intentUrl;
+                
+            } else {
+                alert('Non-Android device detected.');
+            }
         });
     </script>
 </body>
