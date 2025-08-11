@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Player</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --light-text: #E0E0FF;
+            --spinner-color: #5A62FF;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--light-text);
+        }
+
+        /* The container for the video player */
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #youtube-player {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        /* The loading screen overlay */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Transparent black overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        /* The dynamic loading spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--spinner-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Go back button style */
+        .go-back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--light-text);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        
+        .go-back-button:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Film title display at the top center */
+        .film-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--light-text);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            z-index: 9;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .film-info h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+    </style>
+</head>
+<body>
+
+    <button class="go-back-button" onclick="history.back()">Go Back</button>
+
+    <div class="player-container">
+        <div id="youtube-player"></div>
+        
+        <div id="loading-screen">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="film-info" id="film-info">
+            <h2 id="film-title"></h2>
+        </div>
+    </div>
+    
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        let player;
+        
+        function onYouTubeIframeAPIReady() {
+            const filmDataString = localStorage.getItem('currentFilm');
+            if (!filmDataString) {
+                document.body.innerHTML = '<div style="color:white;text-align:center;padding:50px;">Error: Film data not found.</div>';
+                return;
+            }
+            
+            const filmData = JSON.parse(filmDataString);
+            const videoId = extractVideoId(filmData.LINK);
+
+            if (!videoId) {
+                document.body.innerHTML = '<div style="color:white;text-align:center;padding:50px;">Error: Invalid YouTube link.</div>';
+                return;
+            }
+            
+            // Set the film title
+            document.getElementById('film-title').innerText = filmData.TITLE;
+
+            player = new YT.Player('youtube-player', {
+                videoId: videoId,
+                playerVars: {
+                    'controls': 1,
+                    'rel': 0,      
+                    'showinfo': 0,
+                    'autoplay': 1,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            console.log('Player is ready.');
+            event.target.setVolume(100);
+            
+            // Wait for 3 seconds before hiding the loading screen
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.opacity = '0';
+                document.getElementById('loading-screen').style.pointerEvents = 'none';
+            }, 3000); // 3000 milliseconds = 3 seconds
+        }
+        
+        function onPlayerStateChange(event) {
+            const loadingScreen = document.getElementById('loading-screen');
+            const filmInfo = document.getElementById('film-info');
+
+            if (event.data === YT.PlayerState.BUFFERING || event.data === YT.PlayerState.CUED) {
+                loadingScreen.style.opacity = '1';
+                loadingScreen.style.pointerEvents = 'auto';
+            } else if (event.data === YT.PlayerState.PLAYING) {
+                // If the player starts playing, hide the loader immediately.
+                // The delay is only for the initial ready state.
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.pointerEvents = 'none';
+                filmInfo.style.opacity = '0';
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                filmInfo.style.opacity = '1';
+                if (event.data === YT.PlayerState.PAUSED) {
+                     loadingScreen.style.opacity = '0';
+                     loadingScreen.style.pointerEvents = 'none';
+                }
+            }
+        }
+        
+        // Function to extract video ID from URL
+        function extractVideoId(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        // Handle clicks on the loading screen to start playback
+        document.getElementById('loading-screen').addEventListener('click', () => {
+            if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                player.playVideo();
+            }
+        });
+    </script>
+</body>
+</html>
