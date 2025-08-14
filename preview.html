@@ -30,7 +30,6 @@
             color: var(--light-text);
         }
 
-        /* --- UPDATED CSS FOR PORTRAIT MODE --- */
         @media (orientation: portrait) {
             body {
                 transform: rotate(90deg);
@@ -119,7 +118,6 @@
             box-shadow: 0 0 20px var(--button-hover-color), 0 0 40px var(--button-hover-color);
         }
 
-        /* Go back button style */
         .go-back-button {
             position: absolute;
             top: 20px;
@@ -175,30 +173,62 @@
         </div>
     </div>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4tIqVSUIRRKORyf4H34hTu1pkMxFxge0",
+            authDomain: "shazzuott.firebaseapp.com",
+            projectId: "shazzuott",
+            storageBucket: "shazzuott.firebasestorage.app",
+            messagingSenderId: "609756366225",
+            appId: "1:609756366225:web:30610e75ed517c040ac630"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         document.addEventListener('DOMContentLoaded', () => {
-            const filmDataString = localStorage.getItem('currentFilm');
-            if (!filmDataString) return;
+            // Get document ID from URL query
+            const urlParams = new URLSearchParams(window.location.search);
+            const docId = urlParams.get('id'); // 0,1,2,3 etc.
 
-            const filmData = JSON.parse(filmDataString);
-            const link = filmData.LINK;
-            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
+            if (!docId) return;
 
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            if (/android/i.test(userAgent) && link) {
-                // Build proper intent URL
-                const intentUrl = `intent://view?videoLink=${encodeURIComponent(link)}#Intent;scheme=shazzuapp;package=com.ott.shahzadali.shazzu;end`;
+            db.collection("FILMS").doc(docId).get().then(doc => {
+                if (doc.exists) {
+                    const filmData = doc.data();
 
-                // Try to open the app
-                window.location.href = intentUrl;
+                    // Populate content
+                    document.getElementById('film-title').innerText = filmData.TITLE;
+                    document.getElementById('film-description').innerText = filmData.DESCRIPTION;
 
-                // If app not opened in 1.5 seconds → go to Play Store
-                setTimeout(() => {
-                    window.location.href = playStoreUrl;
-                }, 1500);
-            }
+                    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                    const match = filmData.LINK.match(regex);
+                    const videoId = match ? match[1] : null;
+                    if (videoId) {
+                        document.getElementById('film-thumbnail').src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    }
+
+                    document.getElementById('watch-link').href = filmData.LINK;
+
+                    // Android deep link
+                    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                    if (/android/i.test(userAgent) && filmData.LINK) {
+                        const intentUrl = `intent://view?videoLink=${encodeURIComponent(filmData.LINK)}#Intent;scheme=shazzuapp;package=com.ott.shahzadali.shazzu;end`;
+                        window.location.href = intentUrl;
+
+                        setTimeout(() => {
+                            window.location.href = 'https://play.google.com/store/apps/details?id=com.ott.shahzadali.shazzu';
+                        }, 1500);
+                    }
+
+                } else {
+                    console.error("Document not found!");
+                }
+            }).catch(err => console.error("Error fetching document:", err));
         });
-
     </script>
 </body>
 
